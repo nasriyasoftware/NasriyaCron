@@ -1,0 +1,21 @@
+{
+  "name": "nasriya-cron",
+  "version": "1.0.0",
+  "description": "A package to schedule cron-jobs",
+  "main": "src/manager.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cron",
+    "job",
+    "schedule"
+  ],
+  "author": "Nasriya Software, LLC.",
+  "license": "ISC",
+  "dependencies": {
+    "cron-time-generator": "^2.0.3",
+    "node-cron": "^3.0.3",
+    "node-schedule": "^2.1.1"
+  }
+}
