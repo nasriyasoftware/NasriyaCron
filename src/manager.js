@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const { CronTime } = require('cron-time-generator');
 const nodeSchedule = require('node-schedule');
 const Docs = require('./assets/docs');
-const tz = require('./tzNames.json');
+const tz = require('./assets/tzNames.json');
 
 class CronJobManager {
     #tasks = {}
