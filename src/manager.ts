@@ -1,24 +1,25 @@
-const cron = require('node-cron');
-const { CronTime } = require('cron-time-generator');
-const nodeSchedule = require('node-schedule');
-const Docs = require('./assets/docs');
-const tz = require('./assets/tzNames.json');
+import cron from 'node-cron';
+import { CronTime } from 'cron-time-generator';
+import nodeSchedule from 'node-schedule';
+import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './assets/docs';
+import tz from './assets/tzNames.json';
 
 class CronJobManager {
-    #tasks = {}
-    #timeTasks = {}
+    private readonly _names: { name: string, type: 'Recursive' | 'SpecificTime' }[];
+    private _tasks: Record<string, cron.ScheduledTask> = {};
+    private _timeTasks: Record<string, nodeSchedule.Job> = {};
 
     /**
      * Schedule a task
      * @param {string} cronExpression Cron expression
      * @param {Function} task Task to be executed 
-     * @param {Docs.ScheduleOptions} options Optional configuration for job scheduling
-     * @returns {Docs.ScheduledTask}
+     * @param {ScheduleOptions} options Optional configuration for job scheduling
+     * @returns {ScheduledTask}
      */
-    schedule(cronExpression, task, options = {}) {
+    schedule(cronExpression: string, task: Function, options: ScheduleOptions = {}): ScheduledTask {
         try {
             // validate expression
-            if (typeof cronExpression !== 'string') { throw new TypeError(`The cronExpression argument must be a valid cron-expression. Instead recieved ${typeof cronExpression}`) }
+            if (typeof cronExpression !== 'string') { throw new TypeError(`The cronExpression argument must be a valid cron-expression. Instead received ${typeof cronExpression}`) }
             if (!cron.validate(cronExpression)) { throw `(${cronExpression}) is not a valid cron-expression. You can use the expression builder if you need to.` }
 
             // Validate task
@@ -26,13 +27,13 @@ class CronJobManager {
 
             /**
              * An object to collect valid options in
-             * @type {Docs.ScheduleOptions} 
-            */
-            const finalOptions = {
+             * @type {ScheduleOptions} 
+             */
+            const finalOptions: ScheduleOptions = {
                 scheduled: true,
                 runOnInit: false,
                 name: `cron-task_${Math.floor(Math.random() * 1e50)}`
-            }
+            };
 
             // validate the scheduled value
             if ('scheduled' in options) {
@@ -42,8 +43,8 @@ class CronJobManager {
 
             // Validate timezone
             if ('timezone' in options) {
-                if (typeof options.timezone !== 'string') { throw new TypeError(`The timezone is expecetd to be a string, but instead got ${typeof options.timezone}`) }
-                const timezone = tz.find(i => i.toLowerCase() === options.timezone.toLowerCase())
+                if (typeof options.timezone !== 'string') { throw new TypeError(`The timezone is expected to be a string, but instead got ${typeof options.timezone}`) }
+                const timezone = (tz as string[]).find(i => i.toLowerCase() === options.timezone?.toLowerCase());
                 if (!timezone) { throw `(${options.timezone}) is not a valid timezone` }
                 finalOptions.timezone = timezone;
             }
@@ -60,14 +61,15 @@ class CronJobManager {
                 finalOptions.runOnInit = options.runOnInit;
             }
 
-            const cronTask = cron.schedule(cronExpression, task, finalOptions);
-            this.#tasks[finalOptions.name] = cronTask;
+            const cronTask = cron.schedule(cronExpression, task as any, finalOptions);
+            this._tasks[finalOptions.name as string] = cronTask;
+            this._names.push({ name: finalOptions.name as string, type: 'Recursive' });
 
             return Object.freeze({
-                name: finalOptions.name,
+                name: finalOptions.name as string,
                 start: () => cronTask.start(),
                 stop: () => cronTask.stop()
-            })
+            });
         } catch (error) {
             if (typeof error === 'string') { error = `Task Schedule Error: ${error}` }
             if (typeof error?.message === 'string') { error.message = `Task Schedule Error: ${error.message}` }
@@ -78,11 +80,11 @@ class CronJobManager {
     }
 
     /**
-     * 
+     * Schedule tasks on specific times.
      * @param {Date|string|number} time A `Date` instance, [ISO date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) string, or a [timestamp](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now) number
      * @param {Function} task Task to be executed 
      */
-    scheduleTime(time, task) {
+    scheduleTime(time: Date | string | number, task: Function): ScheduledTimedTask {
         try {
             // Validate time
             if (!(time instanceof Date)) {
@@ -109,14 +111,15 @@ class CronJobManager {
             if (typeof task !== 'function') { throw new TypeError(`Expected a callback function as the task value, but instead got ${typeof task}`) }
 
             const taskName = `cron-time-task_${Math.floor(Math.random() * 1e50)}`
-            const cronTask = nodeSchedule.scheduleJob(time, task);
-            this.#timeTasks[taskName] = cronTask;
+            const cronTask = nodeSchedule.scheduleJob(time, task as any);
+            this._timeTasks[taskName] = cronTask;
+            this._names.push({ name: taskName, type: 'SpecificTime' });
 
             return Object.freeze({
                 name: cronTask.name,
                 cancel: () => cronTask.cancel(),
                 invoke: () => cronTask.invoke()
-            })
+            });
         } catch (error) {
             if (typeof error === 'string') { error = `Task Time Schedule Error: ${error}` }
             if (typeof error?.message === 'string') { error.message = `Task Time Schedule Error: ${error.message}` }
@@ -129,19 +132,38 @@ class CronJobManager {
     /**
      * Get a scheduled task
      * @param {string} name The name of the task
-     * @returns {Docs.ScheduledTask|null}
+     * @returns {ScheduledTask|null}
      */
-    getTask(name) {
+    getTask(name: string): ScheduledTask | ScheduledTimedTask | null {
         if (typeof name !== 'string') { throw new TypeError(`The task name that you passed to the getTask method is ${typeof name}, expected a string value`) }
-        const names = Object.keys(this.#tasks);
-        const index = names.map(i => i.toLowerCase()).indexOf(name.toLowerCase());
-        return index > -1 ? this.#tasks[`${names[index]}`] : null;
+        const taskRecord = this._names.find(task => task.name === name);
+        if (!taskRecord) { return null }
+
+        if (taskRecord.type === 'Recursive') {
+            const cronTask = this._tasks[name];
+            return Object.freeze({
+                name: name,
+                start: () => cronTask.start(),
+                stop: () => cronTask.stop()
+            });
+        }
+
+        if (taskRecord.type === 'SpecificTime') {
+            const cronTask = this._timeTasks[name];
+            return Object.freeze({
+                name: cronTask.name,
+                cancel: () => cronTask.cancel(),
+                invoke: () => cronTask.invoke()
+            });
+        }
+
+        return null;
     }
 
     /**View the scheduled tasks */
-    get tasks() { return Object.freeze(...this.#tasks, ...this.#timeTasks) }
+    get tasks(): Object { return Object.freeze({ ...this._tasks, ...this._timeTasks }) }
     /**Generate cron expressions */
-    get time() { return CronTime }
+    get time(): typeof CronTime { return CronTime }
 }
 
-module.exports = new CronJobManager();
+export default new CronJobManager();

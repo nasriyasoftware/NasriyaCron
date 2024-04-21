@@ -2,7 +2,7 @@
   "name": "nasriya-cron",
   "version": "1.0.1",
   "description": "A package to schedule cron-jobs",
-  "main": "src/manager.js",
+  "main": "src/manager.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -21,5 +21,9 @@
   "bugs": {
     "url": "https://github.com/nasriyasoftware/NasriyaCron/issues"
   },
-  "homepage": "https://github.com/nasriyasoftware/NasriyaCron"
+  "homepage": "https://github.com/nasriyasoftware/NasriyaCron",
+  "devDependencies": {
+    "@types/node-cron": "^3.0.11",
+    "@types/node-schedule": "^2.1.7"
+  }
 }

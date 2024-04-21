@@ -1,2 +1,6 @@
 node_modules/
 .vscode/
+
+src/assets/helpers.ts
+src/assets/helpers.js
+src/assets/expBuilder.js
