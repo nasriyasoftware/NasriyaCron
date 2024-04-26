@@ -3,7 +3,7 @@
 [![Static Badge](https://img.shields.io/badge/license-Free_(Restricted)-blue)](https://github.com/nasriyasoftware/NasriyaCron?tab=License-1-ov-file) ![Repository Size](https://img.shields.io/github/repo-size/nasriyasoftware/NasriyaCron.svg) ![Last Commit](https://img.shields.io/github/last-commit/nasriyasoftware/NasriyaCron.svg) [![Status](https://img.shields.io/badge/Status-Stable-green.svg)](link-to-your-status-page)
 ##### Visit us at [www.nasriya.net](https://nasriya.net).
 
-NasriyaDNS is a DNS manager for your domains.
+Easily generate cron-expressions, schedule periodic cron jobs as well as time specific tasks.
 Made with ❤️ in **Palestine** 🇵🇸
 ___
 You can schedule [cron jobs](https://en.wikipedia.org/wiki/Cron) to run periodically or at specific times.

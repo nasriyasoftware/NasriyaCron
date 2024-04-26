@@ -5,7 +5,7 @@ import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './assets/doc
 import tz from './assets/tzNames.json';
 
 class CronJobManager {
-    private readonly _names: { name: string, type: 'Recursive' | 'SpecificTime' }[];
+    private readonly _names: { name: string, type: 'Recursive' | 'SpecificTime' }[] = [];
     private _tasks: Record<string, cron.ScheduledTask> = {};
     private _timeTasks: Record<string, nodeSchedule.Job> = {};
 
