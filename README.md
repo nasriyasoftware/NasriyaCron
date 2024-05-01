@@ -14,33 +14,33 @@ ___
 
 
 ### Installation
-```shellscript
+```shell
 npm install nasriyasoftware/NasriyaCron
 ```
 
 ### Importing
 To use the cron scheduler, you must first import the cron-manager instance:
-```js
-const cronManager = require('nasriya-cron');
+```ts
+import cronManager from 'nasriya-cron';
 ```
 
 ## Usage
 ###### Generate Time Expressions
 Use the `time` module on the cron manager to easily generate cron-expressions.
 
-```js
+```ts
 // Runs every 5 minutes
-const expression1 = cronManager.time.every(5).minutes();
+const expression1: string = cronManager.time.every(5).minutes();
 
 // Runs every Monday and Tuesday
-const expression2 = cronManager.time.onSpecificDays(['Tue', 2]);
+const expression2: string = cronManager.time.onSpecificDays(['Tue', 2]);
 ```
 
 ###### Schedule a Periodic Task
 To schedule tasks using a cron-expression, use the `schedule` method:
 
 ```js
-const task = cronManager.schedule('* * * * *', () => {
+const task: ScheduledTask = cronManager.schedule('* * * * *', () => {
     console.log('A cron-job is running...');
 }, {
     name: 'test_task',          // (Optional) The name of the task
@@ -49,12 +49,12 @@ const task = cronManager.schedule('* * * * *', () => {
 })
 ```
 
-The `schedule` methods returns:
-```js
-{
-    name: string,
-    start: () => void,
-    stop: () => void
+The `schedule` method returns a `ScheduledTask` type:
+```ts
+interface ScheduledTask {
+    name: string;
+    start: () => void;
+    stop: () => void;
 }
 ```
 
@@ -65,17 +65,17 @@ To schedule one-time tasks use the `scheduleTime` method. The method takes two a
 ```js
 // Schedule a task to run after 10 minutes from now:
 const tenMins = 10 * 60 * 1000;
-const task = cronManager.scheduleTime(Date.now() + tenMins, () => {
+const task: ScheduledTimedTask = cronManager.scheduleTime(Date.now() + tenMins, () => {
     console.log('Ten minutes has elapsed since the task was first scheduled')
 })
 ```
 
-The `scheduleTime` methods returns:
-```js
-{
-    name: string,
-    cancel: () => boolean,
-    invoke: () => void
+The `scheduleTime` method returns a `ScheduledTimedTask` type:
+```ts
+interface ScheduledTimedTask {
+    name: string;
+    cancel: () => void;
+    invoke: () => void;
 }
 ```
 ___
