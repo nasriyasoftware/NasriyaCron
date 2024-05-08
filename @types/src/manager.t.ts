@@ -1,5 +1,5 @@
 import { CronTime } from 'cron-time-generator';
-import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from '../../src/assets/docs';
+import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/docs';
 
 /**
  * Manages cron jobs and scheduling tasks.

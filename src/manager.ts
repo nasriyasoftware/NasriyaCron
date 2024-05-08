@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import { CronTime } from 'cron-time-generator';
 import nodeSchedule from 'node-schedule';
-import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './assets/docs';
+import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/docs';
 import tz from './assets/tzNames.json';
 
 class CronJobManager {
