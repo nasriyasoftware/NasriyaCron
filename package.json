@@ -12,7 +12,8 @@
     "schedule"
   ],
   "author": "Nasriya Software, LLC.",
-  "license": "Nasriya License",
+  "license": "Nasriya License",  
+  "types": "./@types",
   "dependencies": {
     "cron-time-generator": "^2.0.3",
     "node-cron": "^3.0.3",
