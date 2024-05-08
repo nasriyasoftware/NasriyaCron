@@ -5,7 +5,6 @@ import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/docs'
  * Manages cron jobs and scheduling tasks.
  */
 declare class CronJobManager {  
-
     /**
      * Schedule a task.
      * @param {string} cronExpression Cron expression.
