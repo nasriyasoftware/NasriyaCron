@@ -1,9 +1,7 @@
 import { CronTime } from 'cron-time-generator';
 import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/docs';
 
-/**
- * Manages cron jobs and scheduling tasks.
- */
+/**Manages cron jobs and scheduling tasks. */
 declare class CronJobManager {  
     /**
      * Schedule a task.
