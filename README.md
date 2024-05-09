@@ -22,7 +22,7 @@ npm install nasriyasoftware/NasriyaCron
 
 ### Importing
 To use the cron scheduler, you must first import the cron-manager instance:
-```js
+```ts
 import cronManager from 'nasriya-cron';
 ```
 
@@ -30,7 +30,7 @@ import cronManager from 'nasriya-cron';
 ###### Generate Time Expressions
 Use the `time` module on the cron manager to easily generate cron-expressions.
 
-```js
+```ts
 // Runs every 5 minutes
 const expression1: string = cronManager.time.every(5).minutes();
 
@@ -41,7 +41,7 @@ const expression2: string = cronManager.time.onSpecificDays(['Tue', 2]);
 ###### Schedule a Periodic Task
 To schedule tasks using a cron-expression, use the `schedule` method:
 
-```js
+```ts
 const task: ScheduledTask = cronManager.schedule('* * * * *', () => {
     console.log('A cron-job is running...');
 }, {
@@ -52,7 +52,7 @@ const task: ScheduledTask = cronManager.schedule('* * * * *', () => {
 ```
 
 The `schedule` method returns a `ScheduledTask` type:
-```js
+```ts
 interface ScheduledTask {
     name: string;
     start: () => void;
@@ -61,10 +61,10 @@ interface ScheduledTask {
 ```
 
 ###### Schedule a One-Time Task
-To schedule one-time tasks use the `scheduleTime` method. The method takes two argumenjs:
-1. `time`: A timestamp `number`, an [ISO date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objecjs/Date/toISOString), or a `Date` instance.
+To schedule one-time tasks use the `scheduleTime` method. The method takes two arguments:
+1. `time`: A timestamp `number`, an [ISO date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString), or a `Date` instance.
 2. `task`: a `function`.
-```js
+```ts
 // Schedule a task to run after 10 minutes from now:
 const tenMins = 10 * 60 * 1000;
 const task: ScheduledTimedTask = cronManager.scheduleTime(Date.now() + tenMins, () => {
@@ -73,7 +73,7 @@ const task: ScheduledTimedTask = cronManager.scheduleTime(Date.now() + tenMins, 
 ```
 
 The `scheduleTime` method returns a `ScheduledTimedTask` type:
-```js
+```ts
 interface ScheduledTimedTask {
     name: string;
     cancel: () => void;
