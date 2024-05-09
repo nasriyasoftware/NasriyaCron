@@ -71,8 +71,12 @@ class CronJobManager {
                 stop: () => cronTask.stop()
             });
         } catch (error) {
-            if (typeof error === 'string') { error = `Task Schedule Error: ${error}` }
-            if (typeof error?.message === 'string') { error.message = `Task Schedule Error: ${error.message}` }
+            if (typeof error === 'string') { throw new Error(`Task Schedule Error: ${error}`) }
+            if (error instanceof Error) {
+                const err = new Error(`Task Schedule Error: ${error.message}`);
+                err.stack = error.stack;
+                throw err;
+            }
 
             console.error(error);
             throw error;
@@ -121,8 +125,12 @@ class CronJobManager {
                 invoke: () => cronTask.invoke()
             });
         } catch (error) {
-            if (typeof error === 'string') { error = `Task Time Schedule Error: ${error}` }
-            if (typeof error?.message === 'string') { error.message = `Task Time Schedule Error: ${error.message}` }
+            if (typeof error === 'string') { throw new Error(`Task Time Schedule Error: ${error}`) }
+            if (error instanceof Error) {
+                const err = new Error(`Task Time Schedule Error: ${error.message}`);
+                err.stack = error.stack;
+                throw err;
+            }
 
             console.error(error);
             throw error;
