@@ -27,6 +27,7 @@ import cronManager from 'nasriya-cron';
 ```
 
 ```js
+// CommonJS Syntax
 const cronManager = require('nasriya-cron').default;
 ```
 

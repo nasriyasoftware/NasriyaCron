@@ -32,7 +32,7 @@ class CronJobManager {
             const finalOptions: ScheduleOptions = {
                 scheduled: true,
                 runOnInit: false,
-                name: `cron-task_${Math.floor(Math.random() * 1e50)}`
+                name: `cron_task_${Math.floor(Math.random() * 1e10)}`
             };
 
             // validate the scheduled value
@@ -90,32 +90,29 @@ class CronJobManager {
      */
     scheduleTime(time: Date | string | number, task: Function): ScheduledTimedTask {
         try {
+            const now = Date.now();
             // Validate time
             if (!(time instanceof Date)) {
                 if (typeof time === 'string') {
-                    try {
-                        const t = new Date(time);
-                        time = t;
-                    } catch (error) {
-                        throw new TypeError(`The "time" argument that you passed (${time}) is not a valid ISO date string`)
-                    }
+                    const t = new Date(time);
+                    if (isNaN(t.getTime())) { throw new TypeError(`The "time" argument that you passed (${time}) is not a valid ISO date string`) }
+                    time = t;
                 } else if (typeof time === 'number') {
-                    try {
-                        const t = new Date(time);
-                        time = t;
-                    } catch (error) {
-                        throw new TypeError(`The "time" argument that you passed (${time}) is not a valid timestamp number`)
-                    }
+                    const t = new Date(time);
+                    if (isNaN(t.getTime()) || t.getTime() <= 0) { throw new TypeError(`The "time" argument that you passed (${time}) is not a valid timestamp number`) }
+                    time = t;
                 } else {
                     throw new TypeError(`The "time" parameter expects a Date instance, string, or number values, but instead got ${typeof time}`)
                 }
             }
 
+            if (time.getTime() < now + 5000) { throw new SyntaxError(`You cannot schedule time in the past`) }
+
             // Validate task
             if (typeof task !== 'function') { throw new TypeError(`Expected a callback function as the task value, but instead got ${typeof task}`) }
 
-            const taskName = `cron-time-task_${Math.floor(Math.random() * 1e50)}`
-            const cronTask = nodeSchedule.scheduleJob(time, task as any);
+            const taskName = `cron_time_task_${Math.floor(Math.random() * 1e10)}`
+            const cronTask = nodeSchedule.scheduleJob(taskName, time, task as any);
             this._timeTasks[taskName] = cronTask;
             this._names.push({ name: taskName, type: 'SpecificTime' });
 
@@ -154,18 +151,16 @@ class CronJobManager {
                 start: () => cronTask.start(),
                 stop: () => cronTask.stop()
             });
-        }
-
-        if (taskRecord.type === 'SpecificTime') {
+        } else if (taskRecord.type === 'SpecificTime') {
             const cronTask = this._timeTasks[name];
             return Object.freeze({
                 name: cronTask.name,
                 cancel: () => cronTask.cancel(),
                 invoke: () => cronTask.invoke()
             });
+        } else {
+            return null;
         }
-
-        return null;
     }
 
     /**View the scheduled tasks */
