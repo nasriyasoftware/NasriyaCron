@@ -2,12 +2,11 @@
   "name": "nasriya-cron",
   "version": "1.0.0",
   "description": "A package to schedule cron-jobs",
-  "main": "dist/manager.js",
-  "types": "dist/@types/manager.d.ts",
+  "main": "src/manager.ts",
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "start": "node dist/manager"
+    "start": "bun run src/manager.ts"
   },
   "keywords": [
     "cron",
