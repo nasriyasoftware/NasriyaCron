@@ -23,7 +23,7 @@
   "bugs": {
     "url": "https://github.com/nasriyasoftware/NasriyaCron/issues"
   },
-  "homepage": "https://github.com/nasriyasoftware/NasriyaCron",
+  "homepage": "https://github.com/nasriyasoftware/NasriyaCron#readme",
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node-cron": "^3.0.11",
