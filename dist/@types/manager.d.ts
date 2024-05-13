@@ -1,9 +1,6 @@
 import { CronTime } from 'cron-time-generator';
 import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/docs';
 declare class CronJobManager {
-    private readonly _names;
-    private _tasks;
-    private _timeTasks;
     /**
      * Schedule a task
      * @param {string} cronExpression Cron expression

@@ -8,9 +8,9 @@ const cron_time_generator_1 = require("cron-time-generator");
 const node_schedule_1 = __importDefault(require("node-schedule"));
 const tzNames_json_1 = __importDefault(require("./assets/tzNames.json"));
 class CronJobManager {
-    _names = [];
-    _tasks = {};
-    _timeTasks = {};
+    #_names = [];
+    #_tasks = {};
+    #_timeTasks = {};
     /**
      * Schedule a task
      * @param {string} cronExpression Cron expression
@@ -75,8 +75,8 @@ class CronJobManager {
                 finalOptions.runOnInit = options.runOnInit;
             }
             const cronTask = node_cron_1.default.schedule(cronExpression, task, finalOptions);
-            this._tasks[finalOptions.name] = cronTask;
-            this._names.push({ name: finalOptions.name, type: 'Recursive' });
+            this.#_tasks[finalOptions.name] = cronTask;
+            this.#_names.push({ name: finalOptions.name, type: 'Recursive' });
             return Object.freeze({
                 name: finalOptions.name,
                 start: () => cronTask.start(),
@@ -133,8 +133,8 @@ class CronJobManager {
             }
             const taskName = `cron_time_task_${Math.floor(Math.random() * 1e10)}`;
             const cronTask = node_schedule_1.default.scheduleJob(taskName, time, task);
-            this._timeTasks[taskName] = cronTask;
-            this._names.push({ name: taskName, type: 'SpecificTime' });
+            this.#_timeTasks[taskName] = cronTask;
+            this.#_names.push({ name: taskName, type: 'SpecificTime' });
             return Object.freeze({
                 name: cronTask.name,
                 cancel: () => cronTask.cancel(),
@@ -163,12 +163,12 @@ class CronJobManager {
         if (typeof name !== 'string') {
             throw new TypeError(`The task name that you passed to the getTask method is ${typeof name}, expected a string value`);
         }
-        const taskRecord = this._names.find(task => task.name === name);
+        const taskRecord = this.#_names.find(task => task.name === name);
         if (!taskRecord) {
             return null;
         }
         if (taskRecord.type === 'Recursive') {
-            const cronTask = this._tasks[name];
+            const cronTask = this.#_tasks[name];
             return Object.freeze({
                 name: name,
                 start: () => cronTask.start(),
@@ -176,7 +176,7 @@ class CronJobManager {
             });
         }
         else if (taskRecord.type === 'SpecificTime') {
-            const cronTask = this._timeTasks[name];
+            const cronTask = this.#_timeTasks[name];
             return Object.freeze({
                 name: cronTask.name,
                 cancel: () => cronTask.cancel(),
@@ -188,7 +188,7 @@ class CronJobManager {
         }
     }
     /**View the scheduled tasks */
-    get tasks() { return Object.freeze({ ...this._tasks, ...this._timeTasks }); }
+    get tasks() { return Object.freeze({ ...this.#_tasks, ...this.#_timeTasks }); }
     /**Generate cron expressions */
     get time() { return cron_time_generator_1.CronTime; }
 }
