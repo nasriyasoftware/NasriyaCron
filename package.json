@@ -2,11 +2,24 @@
   "name": "nasriya-cron",
   "version": "1.0.0",
   "description": "A package to schedule cron-jobs",
-  "main": "src/manager.ts",
+  "main": "dist/cjs/manager.js",
+  "module": "dist/esm/manager.js",
+  "types": "dist/@types/manager.d.ts",
+  "type": "module",
+  "files": [
+    "dist/**/*"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/manager.js",
+      "require": "./dist/cjs/manager.js"
+    }
+  },
   "scripts": {
-    "test": "jest",
-    "build": "tsc",
-    "start": "bun run src/manager.ts"
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc --project tsconfig.esm.json",
+    "build:cjs": "tsc --project tsconfig.cjs.json",
+    "test": "jest"
   },
   "keywords": [
     "cron",

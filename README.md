@@ -10,7 +10,6 @@ You can schedule [cron jobs](https://en.wikipedia.org/wiki/Cron) to run periodic
 
 **Notes:**
 - **NasriyaCron** is part of [HyperCloud](https://github.com/nasriyasoftware/HyperCloud)'s HTTP2 server framework.
-- This package only runs with **TypeScript**. Install the **JavaScript** package from [here](https://github.com/nasriyasoftware/NasriyaCronJS).
 ___
 ## Quick Start Guide
 
@@ -21,8 +20,14 @@ npm install nasriyasoftware/NasriyaCron
 
 ### Importing
 To use the cron scheduler, you must first import the cron-manager instance:
+Import in **ES6** modules:
 ```ts
 import cronManager from 'nasriya-cron';
+```
+
+Import in **CommonJS (CJS)**
+```js
+const cronManager = require('nasriya-cron').default;
 ```
 
 ## Usage
