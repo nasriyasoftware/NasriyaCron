@@ -2,17 +2,17 @@
   "name": "nasriya-cron",
   "version": "1.0.0",
   "description": "A package to schedule cron-jobs",
-  "main": "dist/cjs/manager.js",
-  "module": "dist/esm/manager.js",
-  "types": "dist/@types/manager.d.ts",
-  "type": "module",
+  "main": "./dist/cjs/manager.js",
+  "module": "./dist/esm/manager.js",
+  "types": "./dist/@types/manager.d.ts",
   "files": [
     "dist/**/*"
   ],
   "exports": {
     ".": {
       "import": "./dist/esm/manager.js",
-      "require": "./dist/cjs/manager.js"
+      "require": "./dist/cjs/manager.js",
+      "types": "./dist/@types/manager.d.ts"
     }
   },
   "scripts": {
