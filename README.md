@@ -15,19 +15,19 @@ ___
 
 ### Installation
 ```shell
-npm install nasriyasoftware/NasriyaCron
+npm i @nasriya/cron
 ```
 
 ### Importing
 To use the cron scheduler, you must first import the cron-manager instance:
 Import in **ES6** modules:
 ```ts
-import cronManager from 'nasriya-cron';
+import cronManager from '@nasriya/cron';
 ```
 
 Import in **CommonJS (CJS)**
 ```js
-const cronManager = require('nasriya-cron').default;
+const cronManager = require('@nasriya/cron').default;
 ```
 
 ## Usage
