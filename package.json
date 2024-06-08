@@ -1,6 +1,6 @@
 {
   "name": "@nasriya/cron",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A package to schedule cron-jobs",
   "main": "./dist/cjs/manager.cjs",
   "module": "./dist/esm/manager.mjs",
