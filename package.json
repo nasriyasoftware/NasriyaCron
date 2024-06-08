@@ -1,6 +1,6 @@
 {
   "name": "@nasriya/cron",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A package to schedule cron-jobs",
   "main": "./dist/cjs/manager.js",
   "module": "./dist/esm/manager.js",
@@ -52,7 +52,7 @@
   },
   "homepage": "https://github.com/nasriyasoftware/NasriyaCron#readme",
   "devDependencies": {
-    "@nasriya/postbuild": "^1.0.1",
+    "@nasriya/postbuild": "^1.0.2",
     "@types/jest": "^29.5.12",
     "@types/node-cron": "^3.0.11",
     "@types/node-schedule": "^2.1.7"
