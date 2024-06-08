@@ -9,7 +9,7 @@ ___
 You can schedule [cron jobs](https://en.wikipedia.org/wiki/Cron) to run periodically or at specific times.
 
 **Notes:**
-- **NasriyaCron** is part of [HyperCloud](https://github.com/nasriyasoftware/HyperCloud)'s HTTP2 server framework.
+- **NasriyaCron** is part of [HyperCloud](https://www.npmjs.com/package/@nasriya/HyperCloud)'s HTTP2 server framework.
 ___
 ## Quick Start Guide
 
