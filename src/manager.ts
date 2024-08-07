@@ -2,7 +2,10 @@ import cron from 'node-cron';
 import { CronTime } from 'cron-time-generator';
 import nodeSchedule from 'node-schedule';
 import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/docs';
-import tz from './assets/tzNames.json';
+import fs from 'fs';
+import path from 'path';
+
+const tz = JSON.parse(fs.readFileSync(path.join(__dirname, './assets/tzNames.json'), { encoding: 'utf-8' })) as string[];
 
 class CronJobManager {
     readonly #_names: { name: string, type: 'Recursive' | 'SpecificTime' }[] = [];
