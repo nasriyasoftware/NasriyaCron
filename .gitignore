@@ -1,4 +1,25 @@
+# Node-related
 node_modules/
+**/node_modules/
+
+# IDE and editor metadata
 .vscode/
-dist
-.history
+.*vscode
+.history/
+.*history
+
+# Build and output directories
+build/
+dist/
+Docker/
+
+# Test-related
+test/
+**/test/
+
+# Temp and log folders
+temp/
+*_temp/
+logs*/
+
+# Misc

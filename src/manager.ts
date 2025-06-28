@@ -1,4 +1,4 @@
-import cron from 'node-cron';
+import * as cron from 'node-cron';
 import { CronTime } from 'cron-time-generator';
 import nodeSchedule from 'node-schedule';
 import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/docs';
