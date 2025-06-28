@@ -8,7 +8,7 @@
 Made with ❤️ in **Palestine** 🇵🇸
 ___
 #### Overview
-NasriyaCron is a fast, reliable, and efficient file system watcher built with TypeScript. It supports flexible filtering using globs and regexes, making it ideal for scalable, cross-platform file monitoring with minimal resource usage.
+Easily generate cron-expressions, schedule periodic cron jobs as well as time specific tasks.
 
 > [!IMPORTANT]
 > 
