@@ -1,4 +1,4 @@
-import * as cron from 'node-cron';
+import * as nodeCron from 'node-cron';
 import nodeSchedule from 'node-schedule';
 import { CronTime } from 'cron-time-generator';
 import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/docs';
@@ -10,10 +10,10 @@ export type { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/
 const tz = JSON.parse(fs.readFileSync(path.join(__dirname, './assets/tzNames.json'), { encoding: 'utf-8' })) as string[];
 
 class CronJobManager {
-    readonly #_tasks: Map<string, { task: cron.ScheduledTask, api: ScheduledTask }> = new Map();
+    readonly #_tasks: Map<string, { task: nodeCron.ScheduledTask, api: ScheduledTask }> = new Map();
     readonly #_timeTasks: Map<string, { task: nodeSchedule.Job, api: ScheduledTimedTask }> = new Map();
     readonly #_helpers = {
-        getTaskAPIItem: (cronTask: cron.ScheduledTask): ScheduledTask => {
+        getTaskAPIItem: (cronTask: nodeCron.ScheduledTask): ScheduledTask => {
             return {
                 name: cronTask.name!,
                 start: () => cronTask.start(),
@@ -59,12 +59,13 @@ class CronJobManager {
      * @throws {TypeError} - Throws if `cronExpression` is not a string or invalid, if `task` is not a function,
      *                       or if any option has an incorrect type.
      * @throws {Error} - Throws if a task with the same name already exists.
+     * @since v1.1.0
      */
     schedule(cronExpression: string, task: Function, options: ScheduleOptions = {}): ScheduledTask {
         try {
             // validate expression
             if (typeof cronExpression !== 'string') { throw new TypeError(`The cronExpression argument must be a valid cron-expression. Instead received ${typeof cronExpression}`) }
-            if (!cron.validate(cronExpression)) { throw `(${cronExpression}) is not a valid cron-expression. You can use the expression builder if you need to.` }
+            if (!nodeCron.validate(cronExpression)) { throw `(${cronExpression}) is not a valid cron-expression. You can use the expression builder if you need to.` }
 
             // Validate task
             if (typeof task !== 'function') { throw new TypeError(`Expected a callback function as the task value, but instead got ${typeof task}`) }
@@ -107,7 +108,7 @@ class CronJobManager {
 
             if (this.#_helpers.hasName(finalOptions.name!)) { throw new Error(`A task with the name ${finalOptions.name} already exists`) }
 
-            const cronTask = cron.schedule(cronExpression, task as any, finalOptions);
+            const cronTask = nodeCron.schedule(cronExpression, task as any, finalOptions);
             const api = this.#_helpers.getTaskAPIItem(cronTask);
             this.#_tasks.set(finalOptions.name!, { task: cronTask, api });
 
@@ -126,9 +127,15 @@ class CronJobManager {
     }
 
     /**
-     * Schedule tasks on specific times.
-     * @param {Date|string|number} time A `Date` instance, [ISO date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) string, or a [timestamp](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now) number
-     * @param {Function} task Task to be executed 
+     * Schedule a one-time task to run at a specified time.
+     * @param {Date | string | number} time - The time at which the task should run. If a string, it must be a valid ISO date string. If a number, it must be a valid timestamp number.
+     * @param {Function} task - The function to run when the task is triggered.
+     * @returns {ScheduledTimedTask} - The ScheduledTimedTask API.
+     * @throws {TypeError} - If the time argument is not a Date instance, string, or number value.
+     * @throws {SyntaxError} - If the time argument is in the past.
+     * @throws {TypeError} - If the task argument is not a function.
+     * @throws {Error} - If a task with the same name already exists.
+     * @since v1.1.0
      */
     scheduleTime(time: Date | string | number, task: Function): ScheduledTimedTask {
         try {
@@ -176,6 +183,7 @@ class CronJobManager {
      * Get a scheduled task
      * @param {string} name The name of the task
      * @returns {ScheduledTask|null}
+     * @since v1.1.0
      */
     getTask(name: string): ScheduledTask | ScheduledTimedTask | null {
         if (typeof name !== 'string') { throw new TypeError(`The task name that you passed to the getTask method is ${typeof name}, expected a string value`) }
@@ -196,6 +204,7 @@ class CronJobManager {
      *     the periodic tasks.
      *   - `scheduled`: An array of `ScheduledTimedTask` objects representing
      *     the one-time scheduled tasks.
+     * @since v1.1.0
      */
     get tasks() {
         return {
@@ -204,8 +213,31 @@ class CronJobManager {
         }
     }
 
-    /**Generate cron expressions */
+    /**
+     * Generate cron expressions
+     * @since v1.1.0
+     */
     get time(): typeof CronTime { return CronTime }
+
+    /**
+     * Destroys all scheduled tasks, both periodic and one-time.
+     * This method is idempotent, it will not throw if called multiple times.
+     * @returns {Promise<void>}
+     * @since v1.1.0
+     */
+    async destroy(): Promise<void> {
+        const promises = [];
+        for (const [_, task] of this.#_tasks) {
+            promises.push(task.api.destroy())
+        }
+
+        for (const [_, task] of this.#_timeTasks) {
+            promises.push(task.api.destroy())
+        }
+
+        await Promise.all(promises);
+    }
 }
 
-export default new CronJobManager();
+const cron = new CronJobManager();
+export default cron;
