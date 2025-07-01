@@ -1,13 +1,29 @@
 export interface ScheduledTask {
+    /** The name of the task */
     name: string;
+    /** Start/resume the task */
     start: () => void;
+    /** Pause the task */
     stop: () => void;
+    /**
+     * Destroy the task
+     * @returns Promise<void>
+     */
+    destroy: () => Promise<void>;
 }
 
 export interface ScheduledTimedTask {
+    /** The name of the task */
     name: string;
+    /** Cancel the task */
     cancel: () => void;
+    /** Invoke the task */
     invoke: () => void;
+    /**
+     * Destroy the task
+     * @returns Promise<void>
+     */
+    destroy: () => Promise<void>;
 }
 
 export interface ScheduleOptions {

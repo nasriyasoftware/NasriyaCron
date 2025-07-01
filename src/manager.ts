@@ -1,6 +1,6 @@
 import * as cron from 'node-cron';
-import { CronTime } from 'cron-time-generator';
 import nodeSchedule from 'node-schedule';
+import { CronTime } from 'cron-time-generator';
 import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/docs';
 import fs from 'fs';
 import path from 'path';
@@ -10,16 +10,54 @@ export type { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/
 const tz = JSON.parse(fs.readFileSync(path.join(__dirname, './assets/tzNames.json'), { encoding: 'utf-8' })) as string[];
 
 class CronJobManager {
-    readonly #_names: { name: string, type: 'Recursive' | 'SpecificTime' }[] = [];
-    #_tasks: Record<string, cron.ScheduledTask> = {};
-    #_timeTasks: Record<string, nodeSchedule.Job> = {};
+    readonly #_tasks: Map<string, { task: cron.ScheduledTask, api: ScheduledTask }> = new Map();
+    readonly #_timeTasks: Map<string, { task: nodeSchedule.Job, api: ScheduledTimedTask }> = new Map();
+    readonly #_helpers = {
+        getTaskAPIItem: (cronTask: cron.ScheduledTask): ScheduledTask => {
+            return {
+                name: cronTask.name!,
+                start: () => cronTask.start(),
+                stop: () => cronTask.stop(),
+                destroy: async () => {
+                    cronTask.stop();
+                    cronTask.destroy();
+                    this.#_tasks.delete(cronTask.name!);
+                }
+            };
+        },
+
+        getTimeTaskAPIItem: (timeTask: nodeSchedule.Job): ScheduledTimedTask => {
+            return {
+                name: timeTask.name,
+                cancel: () => timeTask.cancel(),
+                invoke: () => timeTask.invoke(),
+                destroy: async () => {
+                    timeTask.cancel();
+                }
+            }
+        },
+
+        hasName: (name: string): boolean => {
+            return this.#_tasks.has(name) || this.#_timeTasks.has(name);
+        }
+    }
 
     /**
-     * Schedule a task
-     * @param {string} cronExpression Cron expression
-     * @param {Function} task Task to be executed 
-     * @param {ScheduleOptions} options Optional configuration for job scheduling
-     * @returns {ScheduledTask}
+     * Schedules a periodic task using a cron expression.
+     * 
+     * @param {string} cronExpression - A valid cron expression string to define the task schedule.
+     * @param {Function} task - The task to execute, provided as a function.
+     * @param {ScheduleOptions} [options={}] - Optional scheduling options:
+     *   - `scheduled`: Boolean indicating whether the task is scheduled to run automatically.
+     *   - `timezone`: String specifying the timezone for the task execution.
+     *   - `name`: A unique name for the task.
+     *   - `runOnInit`: Boolean indicating if the task should run immediately upon scheduling.
+     * 
+     * @returns {ScheduledTask} - An object containing methods to manage the scheduled task.
+     * 
+     * @throws {TypeError} - Throws if `cronExpression` is not a string or invalid, if `task` is not a function,
+     *                       or if any option has an incorrect type.
+     * @throws {Error} - Throws if a task with the same name already exists.
      */
     schedule(cronExpression: string, task: Function, options: ScheduleOptions = {}): ScheduledTask {
         try {
@@ -66,15 +104,13 @@ class CronJobManager {
                 finalOptions.runOnInit = options.runOnInit;
             }
 
-            const cronTask = cron.schedule(cronExpression, task as any, finalOptions);
-            this.#_tasks[finalOptions.name as string] = cronTask;
-            this.#_names.push({ name: finalOptions.name as string, type: 'Recursive' });
+            if (this.#_helpers.hasName(finalOptions.name!)) { throw new Error(`A task with the name ${finalOptions.name} already exists`) }
 
-            return Object.freeze({
-                name: finalOptions.name as string,
-                start: () => cronTask.start(),
-                stop: () => cronTask.stop()
-            });
+            const cronTask = cron.schedule(cronExpression, task as any, finalOptions);
+            const api = this.#_helpers.getTaskAPIItem(cronTask);
+            this.#_tasks.set(finalOptions.name!, { task: cronTask, api });
+
+            return Object.freeze(api);
         } catch (error) {
             if (typeof error === 'string') { throw new Error(`Task Schedule Error: ${error}`) }
             if (error instanceof Error) {
@@ -118,14 +154,10 @@ class CronJobManager {
 
             const taskName = `cron_time_task_${Math.floor(Math.random() * 1e10)}`
             const cronTask = nodeSchedule.scheduleJob(taskName, time, task as any);
-            this.#_timeTasks[taskName] = cronTask;
-            this.#_names.push({ name: taskName, type: 'SpecificTime' });
+            const api = this.#_helpers.getTimeTaskAPIItem(cronTask);
+            this.#_timeTasks.set(taskName, { task: cronTask, api });
 
-            return Object.freeze({
-                name: cronTask.name,
-                cancel: () => cronTask.cancel(),
-                invoke: () => cronTask.invoke()
-            });
+            return Object.freeze(api);
         } catch (error) {
             if (typeof error === 'string') { throw new Error(`Task Time Schedule Error: ${error}`) }
             if (error instanceof Error) {
@@ -146,30 +178,31 @@ class CronJobManager {
      */
     getTask(name: string): ScheduledTask | ScheduledTimedTask | null {
         if (typeof name !== 'string') { throw new TypeError(`The task name that you passed to the getTask method is ${typeof name}, expected a string value`) }
-        const taskRecord = this.#_names.find(task => task.name === name);
-        if (!taskRecord) { return null }
+        const task = this.#_tasks.get(name);
+        if (task) { return Object.freeze(task.api) }
 
-        if (taskRecord.type === 'Recursive') {
-            const cronTask = this.#_tasks[name];
-            return Object.freeze({
-                name: name,
-                start: () => cronTask.start(),
-                stop: () => cronTask.stop()
-            });
-        } else if (taskRecord.type === 'SpecificTime') {
-            const cronTask = this.#_timeTasks[name];
-            return Object.freeze({
-                name: cronTask.name,
-                cancel: () => cronTask.cancel(),
-                invoke: () => cronTask.invoke()
-            });
-        } else {
-            return null;
+        const timeTask = this.#_timeTasks.get(name);
+        if (timeTask) { return Object.freeze(timeTask.api) }
+
+        return null;
+    }
+
+    /**
+     * Retrieves all scheduled tasks.
+     *
+     * @returns An object containing two arrays:
+     *   - `periodic`: An array of `ScheduledTask` objects representing
+     *     the periodic tasks.
+     *   - `scheduled`: An array of `ScheduledTimedTask` objects representing
+     *     the one-time scheduled tasks.
+     */
+    get tasks() {
+        return {
+            periodic: Array.from(this.#_tasks.values()).map(i => Object.freeze(i.api)),
+            scheduled: Array.from(this.#_timeTasks.values()).map(i => Object.freeze(i.api))
         }
     }
 
-    /**View the scheduled tasks */
-    get tasks(): Object { return Object.freeze({ ...this.#_tasks, ...this.#_timeTasks }) }
     /**Generate cron expressions */
     get time(): typeof CronTime { return CronTime }
 }

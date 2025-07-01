@@ -64,9 +64,10 @@ const task: ScheduledTask = cron.schedule('* * * * *', () => {
 The `schedule` method returns a `ScheduledTask` type:
 ```ts
 interface ScheduledTask {
-    name: string;
-    start: () => void;
-    stop: () => void;
+    name: string;                   // The name of the task
+    start: () => void;              // Start/resume the task
+    stop: () => void;               // Pause the task
+    destroy: () => Promise<void>;   // Destroy the task
 }
 ```
 
@@ -85,9 +86,10 @@ const task: ScheduledTimedTask = cron.scheduleTime(Date.now() + tenMins, () => {
 The `scheduleTime` method returns a `ScheduledTimedTask` type:
 ```ts
 interface ScheduledTimedTask {
-    name: string;
-    cancel: () => void;
-    invoke: () => void;
+    name: string;                   // The name of the task
+    cancel: () => void;             // Cancel the task
+    invoke: () => void;             // Invoke the task
+    destroy: () => Promise<void>;   // Destroy the task
 }
 ```
 ___
