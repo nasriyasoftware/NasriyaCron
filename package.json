@@ -1,6 +1,6 @@
 {
   "name": "@nasriya/cron",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A package to schedule cron-jobs",
   "keywords": [
     "cron",
@@ -52,7 +52,7 @@
   "author": "Nasriya Software",
   "dependencies": {
     "cron-time-generator": "^2.0.3",
-    "node-cron": "^4.1.1",
+    "node-cron": "^4.2.0",
     "node-schedule": "^2.1.1"
   },
   "devDependencies": {
