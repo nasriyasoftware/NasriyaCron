@@ -33,6 +33,7 @@ class CronJobManager {
                 invoke: () => timeTask.invoke(),
                 destroy: async () => {
                     timeTask.cancel();
+                    this.#_timeTasks.delete(timeTask.name);
                 }
             }
         },
