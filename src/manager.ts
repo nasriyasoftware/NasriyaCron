@@ -5,6 +5,8 @@ import { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/docs'
 import fs from 'fs';
 import path from 'path';
 
+export type { ScheduleOptions, ScheduledTask, ScheduledTimedTask } from './docs/docs';
+
 const tz = JSON.parse(fs.readFileSync(path.join(__dirname, './assets/tzNames.json'), { encoding: 'utf-8' })) as string[];
 
 class CronJobManager {
