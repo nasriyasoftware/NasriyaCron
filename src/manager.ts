@@ -114,14 +114,9 @@ class CronJobManager {
 
             return Object.freeze(api);
         } catch (error) {
-            if (typeof error === 'string') { throw new Error(`Task Schedule Error: ${error}`) }
-            if (error instanceof Error) {
-                const err = new Error(`Task Schedule Error: ${error.message}`);
-                err.stack = error.stack;
-                throw err;
-            }
+            if (typeof error === 'string') { error = new Error(`Task Schedule Error: ${error}`) }
+            if (error instanceof Error) { error.message = `Task Schedule Error: ${error.message}` }
 
-            console.error(error);
             throw error;
         }
     }
@@ -139,42 +134,38 @@ class CronJobManager {
      */
     scheduleTime(time: Date | string | number, task: Function): ScheduledTimedTask {
         try {
-            const now = Date.now();
-            // Validate time
-            if (!(time instanceof Date)) {
+            const now = new Date();
+            const parsedTime: Date = (() => {
+                if (time instanceof Date) { return time }
+                // Validate time
                 if (typeof time === 'string') {
                     const t = new Date(time);
                     if (isNaN(t.getTime())) { throw new TypeError(`The "time" argument that you passed (${time}) is not a valid ISO date string`) }
-                    time = t;
+                    return t;
                 } else if (typeof time === 'number') {
                     const t = new Date(time);
                     if (isNaN(t.getTime()) || t.getTime() <= 0) { throw new TypeError(`The "time" argument that you passed (${time}) is not a valid timestamp number`) }
-                    time = t;
+                    return t;
                 } else {
-                    throw new TypeError(`The "time" parameter expects a Date instance, string, or number values, but instead got ${typeof time}`)
+                    throw new TypeError(`The "time" parameter expects a Date instance, string, or number value, but got ${typeof time}`);
                 }
-            }
+            })();
 
-            if (time.getTime() < now + 5000) { throw new SyntaxError(`You cannot schedule time in the past`) }
+            if (parsedTime.getTime() + 50 < now.getTime()) { throw new RangeError(`(${parsedTime.toISOString()}) is in the past compared to now (${now.toISOString()})`) }
 
             // Validate task
             if (typeof task !== 'function') { throw new TypeError(`Expected a callback function as the task value, but instead got ${typeof task}`) }
 
             const taskName = `cron_time_task_${Math.floor(Math.random() * 1e10)}`
-            const cronTask = nodeSchedule.scheduleJob(taskName, time, task as any);
+            const cronTask = nodeSchedule.scheduleJob(taskName, parsedTime, task as any);
             const api = this.#_helpers.getTimeTaskAPIItem(cronTask);
             this.#_timeTasks.set(taskName, { task: cronTask, api });
 
             return Object.freeze(api);
         } catch (error) {
-            if (typeof error === 'string') { throw new Error(`Task Time Schedule Error: ${error}`) }
-            if (error instanceof Error) {
-                const err = new Error(`Task Time Schedule Error: ${error.message}`);
-                err.stack = error.stack;
-                throw err;
-            }
+            if (typeof error === 'string') { error = new Error(`Task Time Schedule Error: ${error}`) }
+            if (error instanceof Error) { error.message = `Task Time Schedule Error: ${error.message}` }
 
-            console.error(error);
             throw error;
         }
     }
